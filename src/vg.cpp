@@ -1229,14 +1229,16 @@ void endFrame(Context* ctx)
 				}
 
 				stencilState = 0
-					| (cmdClipState->m_Rule == ClipRule::In ? BGFX_STENCIL_TEST_EQUAL : BGFX_STENCIL_TEST_NOTEQUAL)
+					| ((cmdClipState->m_Rule == ClipRule::In || cmdClipState->m_Rule == ClipRule::HoldIn) ? BGFX_STENCIL_TEST_EQUAL : BGFX_STENCIL_TEST_NOTEQUAL)
 					| BGFX_STENCIL_FUNC_REF(nextStencilValue)
 					| BGFX_STENCIL_FUNC_RMASK(0xff)
 					| BGFX_STENCIL_OP_FAIL_S_KEEP
 					| BGFX_STENCIL_OP_FAIL_Z_KEEP
 					| BGFX_STENCIL_OP_PASS_Z_KEEP;
 
-				++nextStencilValue;
+				if (cmdClipState->m_Rule == ClipRule::In || cmdClipState->m_Rule == ClipRule::Out) {
+					++nextStencilValue;
+				}
 			} else {
 				stencilState = BGFX_STENCIL_NONE;
 			}

@@ -276,6 +276,8 @@ struct ClipRule
 	{
 		In  = 0, // fillRule = "nonzero"?
 		Out = 1, // fillRule = "evenodd"?
+		HoldIn = 2,
+		HoldOut = 3,
 	};
 };
 
