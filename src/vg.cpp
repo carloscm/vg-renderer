@@ -1804,6 +1804,7 @@ float measureText(Context* ctx, const TextConfig& cfg, float x, float y, const c
 	FONScontext* fons = ctx->m_FontStashContext;
 	fonsSetSize(fons, cfg.m_FontSize * scale);
 	fonsSetAlign(fons, cfg.m_Alignment);
+	fonsSetBlur(fons, cfg.m_Blur);
 	fonsSetFont(fons, cfg.m_FontHandle.idx);
 
 	float width = fonsTextBounds(fons, x * scale, y * scale, str, end, bounds);
@@ -1835,6 +1836,7 @@ void measureTextBox(Context* ctx, const TextConfig& cfg, float x, float y, float
 	FONScontext* fons = ctx->m_FontStashContext;
 	fonsSetAlign(fons, newAlignment);
 	fonsSetSize(fons, cfg.m_FontSize * scale);
+	fonsSetBlur(fons, cfg.m_Blur);
 	fonsSetFont(fons, cfg.m_FontHandle.idx);
 
 	float lineh;
@@ -1899,6 +1901,7 @@ float getTextLineHeight(Context* ctx, const TextConfig& cfg)
 	FONScontext* fons = ctx->m_FontStashContext;
 	fonsSetSize(fons, cfg.m_FontSize * scale);
 	fonsSetAlign(fons, cfg.m_Alignment);
+	fonsSetBlur(fons, cfg.m_Blur);
 	fonsSetFont(fons, cfg.m_FontHandle.idx);
 
 	float lineh;
@@ -1934,6 +1937,7 @@ int textBreakLines(Context* ctx, const TextConfig& cfg, const char* str, const c
 	FONScontext* fons = ctx->m_FontStashContext;
 	fonsSetSize(fons, cfg.m_FontSize * scale);
 	fonsSetAlign(fons, cfg.m_Alignment);
+	fonsSetBlur(fons, cfg.m_Blur);
 	fonsSetFont(fons, cfg.m_FontHandle.idx);
 
 	breakRowWidth *= scale;
@@ -2156,6 +2160,7 @@ int textGlyphPositions(Context* ctx, const TextConfig& cfg, float x, float y, co
 	FONScontext* fons = ctx->m_FontStashContext;
 	fonsSetSize(fons, cfg.m_FontSize * scale);
 	fonsSetAlign(fons, cfg.m_Alignment);
+	fonsSetBlur(fons, cfg.m_Blur);
 	fonsSetFont(fons, cfg.m_FontHandle.idx);
 
 	FONStextIter iter, prevIter;
@@ -3950,6 +3955,7 @@ static void ctxText(Context* ctx, const TextConfig& cfg, float x, float y, const
 	FONSstring* vgs = &ctx->m_TextString;
 	FONScontext* fons = ctx->m_FontStashContext;
 	fonsSetSize(fons, scaledFontSize);
+	fonsSetBlur(fons, cfg.m_Blur);
 	fonsSetFont(fons, cfg.m_FontHandle.idx);
 
 	fonsResetString(fons, vgs, str, end);
