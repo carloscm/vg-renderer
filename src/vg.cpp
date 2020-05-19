@@ -746,6 +746,7 @@ Context* createContext(bx::AllocatorI* allocator, const ContextConfig* userCfg)
 
 #if VG_CONFIG_COMMAND_LIST_BEGIN_END_API
 	ctx->m_VTable = &g_CtxVTable;
+	ctx->m_ActiveCommandList = VG_INVALID_HANDLE;
 #endif
 
 	bx::memCopy(&ctx->m_Config, cfg, sizeof(ContextConfig));
@@ -1181,7 +1182,7 @@ void end(Context* ctx)
 
 					// TODO: Check if it's better to use Type_TexturedVertexColor program here to avoid too many 
 					// state switches.
-					bgfx::submit(viewID, ctx->m_ProgramHandle[DrawCommand::Type::Clip], 0, false);
+					bgfx::submit(viewID, ctx->m_ProgramHandle[DrawCommand::Type::Clip]);
 				}
 
 				stencilState = 0
@@ -1229,7 +1230,7 @@ void end(Context* ctx)
 				| BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_INV_SRC_ALPHA));
 			bgfx::setStencil(stencilState);
 
-			bgfx::submit(viewID, ctx->m_ProgramHandle[DrawCommand::Type::Textured], 0, false);
+			bgfx::submit(viewID, ctx->m_ProgramHandle[DrawCommand::Type::Textured]);
 		} else if (cmd->m_Type == DrawCommand::Type::ColorGradient) {
 			VG_CHECK(cmd->m_HandleID != UINT16_MAX, "Invalid gradient handle");
 			Gradient* grad = &ctx->m_Gradients[cmd->m_HandleID];
@@ -1245,7 +1246,7 @@ void end(Context* ctx)
 				| BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_INV_SRC_ALPHA));
 			bgfx::setStencil(stencilState);
 
-			bgfx::submit(viewID, ctx->m_ProgramHandle[DrawCommand::Type::ColorGradient], 0, false);
+			bgfx::submit(viewID, ctx->m_ProgramHandle[DrawCommand::Type::ColorGradient]);
 		} else if(cmd->m_Type == DrawCommand::Type::ImagePattern) {
 			VG_CHECK(cmd->m_HandleID != UINT16_MAX, "Invalid image pattern handle");
 			ImagePattern* imgPattern = &ctx->m_ImagePatterns[cmd->m_HandleID];
@@ -1262,7 +1263,7 @@ void end(Context* ctx)
 				| BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_INV_SRC_ALPHA));
 			bgfx::setStencil(stencilState);
 
-			bgfx::submit(viewID, ctx->m_ProgramHandle[DrawCommand::Type::ImagePattern], 0, false);
+			bgfx::submit(viewID, ctx->m_ProgramHandle[DrawCommand::Type::ImagePattern]);
 		} else {
 			VG_CHECK(false, "Unknown draw command type");
 		}
@@ -3374,7 +3375,7 @@ static void ctxStrokePathColor(Context* ctx, Color color, float width, uint32_t 
 	const float globalAlpha = hasCache ? 1.0f : state->m_GlobalAlpha;
 	const float fringeWidth = ctx->m_FringeWidth;
 
-	const float scaledStrokeWidth = bx::clamp<float>(width * avgScale, 0.0f, 200.0f);
+	const float scaledStrokeWidth = ((flags & StrokeFlags::FixedWidth) != 0) ? width : bx::clamp<float>(width * avgScale, 0.0f, 200.0f);
 	const bool isThin = scaledStrokeWidth <= fringeWidth;
 
 	const float alphaScale = !isThin ? globalAlpha : globalAlpha * bx::square(bx::clamp<float>(scaledStrokeWidth, 0.0f, fringeWidth));
@@ -3474,7 +3475,7 @@ static void ctxStrokePathGradient(Context* ctx, GradientHandle gradientHandle, f
 
 	const State* state = getState(ctx);
 	const float avgScale = state->m_AvgScale;
-	float strokeWidth = bx::clamp<float>(width * avgScale, 0.0f, 200.0f);
+	float strokeWidth = ((flags & StrokeFlags::FixedWidth) != 0) ? width : bx::clamp<float>(width * avgScale, 0.0f, 200.0f);
 	bool isThin = false;
 	if (strokeWidth <= ctx->m_FringeWidth) {
 		strokeWidth = ctx->m_FringeWidth;
@@ -3553,7 +3554,7 @@ static void ctxStrokePathImagePattern(Context* ctx, ImagePatternHandle imgPatter
 	const float globalAlpha = hasCache ? 1.0f : state->m_GlobalAlpha;
 	const float fringeWidth = ctx->m_FringeWidth;
 
-	const float scaledStrokeWidth = bx::clamp<float>(width * avgScale, 0.0f, 200.0f);
+	const float scaledStrokeWidth = ((flags & StrokeFlags::FixedWidth) != 0) ? width : bx::clamp<float>(width * avgScale, 0.0f, 200.0f);
 	const bool isThin = scaledStrokeWidth <= fringeWidth;
 
 	const float alphaScale = isThin ? globalAlpha : globalAlpha * bx::square(bx::clamp<float>(scaledStrokeWidth, 0.0f, fringeWidth));
