@@ -1815,24 +1815,24 @@ void measureTextBox(Context* ctx, const TextConfig& cfg, float x, float y, float
 	minx = maxx = x;
 	miny = maxy = y;
 
-	TextRow rows[2];
+	TextRow rows[5];
 	int nrows = 0;
 
 	const TextConfig newTextCfg = { cfg.m_FontHandle, cfg.m_FontSize, newAlignment, vg::Colors::Transparent };
-	while ((nrows = textBreakLines(ctx, newTextCfg, text, end, breakWidth, rows, 2, flags))) {
+	while ((nrows = textBreakLines(ctx, newTextCfg, text, end, breakWidth, rows, 5, flags))) {
 		for (uint32_t i = 0; i < (uint32_t)nrows; i++) {
 			const TextRow* row = &rows[i];
 
 			// Horizontal bounds
 			float dx = 0.0f; // Assume left align
 			if (halign & FONS_ALIGN_CENTER) {
-				dx = breakWidth * 0.5f - row->width * 0.5f;
+				dx = row->width * 0.5f;
 			} else if (halign & FONS_ALIGN_RIGHT) {
 				dx = breakWidth - row->width;
 			}
 
-			const float rminx = x + row->minx + dx;
-			const float rmaxx = x + row->maxx + dx;
+			const float rminx = x - dx;
+			const float rmaxx = x + dx;
 
 			minx = bx::min<float>(minx, rminx);
 			maxx = bx::max<float>(maxx, rmaxx);
@@ -4206,16 +4206,16 @@ static void ctxTextBox(Context* ctx, const TextConfig& cfg, float x, float y, fl
 
 	const TextConfig newCfg = makeTextConfig(ctx, cfg.m_FontHandle, cfg.m_FontSize, FONS_ALIGN_LEFT | valign, cfg.m_Color);
 
-	TextRow rows[2];
+	TextRow rows[5];
 	int nrows;
-	while ((nrows = textBreakLines(ctx, cfg, str, end, breakWidth, rows, 2, textboxFlags))) {
+	while ((nrows = textBreakLines(ctx, cfg, str, end, breakWidth, rows, 5, textboxFlags))) {
 		for (int i = 0; i < nrows; ++i) {
 			TextRow* row = &rows[i];
 
 			if (halign & FONS_ALIGN_LEFT) {
 				ctxText(ctx, newCfg, x, y, row->start, row->end);
 			} else if (halign & FONS_ALIGN_CENTER) {
-				ctxText(ctx, newCfg, x + (breakWidth - row->width) * 0.5f, y, row->start, row->end);
+				ctxText(ctx, newCfg, x - row->width * 0.5f, y, row->start, row->end);
 			} else if (halign & FONS_ALIGN_RIGHT) {
 				ctxText(ctx, newCfg, x + breakWidth - row->width, y, row->start, row->end);
 			}
