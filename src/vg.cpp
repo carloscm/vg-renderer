@@ -851,6 +851,29 @@ Context* createContext(bx::AllocatorI* allocator, const ContextConfig* userCfg)
 	return ctx;
 }
 
+bgfx::TextureHandle getFontAtlasTexture(Context* ctx) {
+
+	if (!ctx) {
+		return { bgfx::kInvalidHandle };
+	}
+
+	if (ctx->m_FontImageID >= VG_CONFIG_MAX_FONT_IMAGES) {
+		return { bgfx::kInvalidHandle };
+	}
+
+	auto handle = ctx->m_FontImages[ctx->m_FontImageID];
+	if (handle.idx == UINT16_MAX) {
+		return { bgfx::kInvalidHandle };
+	}
+	
+	if (!isValid(handle)) {
+		return { bgfx::kInvalidHandle };
+	}
+
+	Image* img = &ctx->m_Images[handle.idx];
+	return img->m_bgfxHandle;
+}
+
 void destroyContext(Context* ctx)
 {
 	bx::AllocatorI* allocator = ctx->m_Allocator;

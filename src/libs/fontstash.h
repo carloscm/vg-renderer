@@ -226,6 +226,19 @@ void fonsResetString(FONScontext* stash, FONSstring* str, const char* text, cons
 int fonsBakeString(FONScontext* stash, FONSstring* str);
 float fonsAlignString(FONScontext* stash, FONSstring* str, unsigned int align, float* x, float* y);
 
+// Stateless, single-glyph API
+int fonsGetGlyphQuad(
+	FONScontext* stash,
+	int font,
+	unsigned int prevCodepoint,
+	unsigned int codepoint,
+	float size,
+	float spacing,
+	float* x,
+	float* y,
+	FONSquad* q
+);
+
 // Draws the stash texture for debugging
 #if FONS_RENDERING
 void fonsDrawDebug(FONScontext* s, float x, float y);
@@ -1676,6 +1689,42 @@ int fonsTextIterNext(FONScontext* stash, FONStextIter* iter, FONSquad* quad)
 		break;
 	}
 	iter->next = str;
+
+	return 1;
+}
+
+int fonsGetGlyphQuad(
+	FONScontext* stash,
+	int ifont,
+	unsigned int prevCodepoint,
+	unsigned int codepoint,
+	float size,
+	float spacing,
+	float* x,
+	float* y,
+	FONSquad* q
+) {
+	if (stash == NULL) return 0;
+
+	if (ifont < 0 || ifont >= stash->nfonts) return 0;
+	FONSfont* font = stash->fonts[ifont];
+	if (font->data == NULL) return 0;
+
+	short isize = (short)(size * 10.0f);
+	float scale = fons__tt_getPixelHeightScale(&font->font, (float)isize / 10.0f);
+
+	FONSglyph* glyph = fons__getGlyph(stash, font, codepoint, isize, 0, FONS_GLYPH_BITMAP_REQUIRED);
+	if (glyph == NULL) return 0;
+
+	int prevGlyphIndex = -1;
+	if (prevCodepoint) {
+		FONSglyph* prevGlyph = fons__getGlyph(stash, font, prevCodepoint, isize, 0, FONS_GLYPH_BITMAP_REQUIRED);
+		if (prevGlyph) {
+			prevGlyphIndex = prevGlyph->index;
+		}
+	}
+
+	fons__getQuad(stash, font, prevGlyphIndex, glyph, scale, spacing, x, y, q);
 
 	return 1;
 }

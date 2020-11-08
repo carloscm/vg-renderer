@@ -309,6 +309,7 @@ typedef float uv_t;
 
 VG_HANDLE32(GradientHandle);
 VG_HANDLE32(ImagePatternHandle);
+
 VG_HANDLE(ImageHandle);
 VG_HANDLE(FontHandle);
 VG_HANDLE(CommandListHandle);
@@ -396,6 +397,7 @@ struct Context;
 // Context
 Context* createContext(bx::AllocatorI* allocator, const ContextConfig* cfg = nullptr);
 void destroyContext(Context* ctx);
+bgfx::TextureHandle getFontAtlasTexture(Context* ctx);
 
 void begin(Context* ctx, uint16_t viewID, uint16_t canvasWidth, uint16_t canvasHeight, float devicePixelRatio);
 void end(Context* ctx);
