@@ -265,6 +265,12 @@ struct TextBoxFlags
 	};
 };
 
+struct GlyphQuad
+{
+	float x0, y0, x1, y1;
+	float s0, t0, s1, t1;
+};
+
 struct ImageFlags
 {
 	enum Enum : uint32_t
@@ -459,6 +465,18 @@ void measureTextBox(Context* ctx, const TextConfig& cfg, float x, float y, float
 float getTextLineHeight(Context* ctx, const TextConfig& cfg);
 int textBreakLines(Context* ctx, const TextConfig& cfg, const char* str, const char* end, float breakRowWidth, TextRow* rows, int maxRows, uint32_t flags);
 int textGlyphPositions(Context* ctx, const TextConfig& cfg, float x, float y, const char* text, const char* end, GlyphPosition* positions, int maxPositions);
+
+int textGetGlyphQuad(
+	Context* ctx,
+	FontHandle font,
+	unsigned int prevCodepoint,
+	unsigned int codepoint,
+	float size,
+	float spacing,
+	float* x,
+	float* y,
+	GlyphQuad* q
+);
 
 /*
  * pos: A list of 2D vertices (successive x,y pairs)

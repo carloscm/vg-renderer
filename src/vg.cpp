@@ -2176,6 +2176,56 @@ int textGlyphPositions(Context* ctx, const TextConfig& cfg, float x, float y, co
 	return npos;
 }
 
+int textGetGlyphQuad(
+	Context* ctx,
+	FontHandle font,
+	unsigned int prevCodepoint,
+	unsigned int codepoint,
+	float size,
+	float spacing,
+	float* x,
+	float* y,
+	GlyphQuad* gq
+) {
+	FONSquad q;
+	int ok = fonsGetGlyphQuad(
+		ctx->m_FontStashContext,
+		font.idx,
+		prevCodepoint,
+		codepoint,
+		size,
+		spacing,
+		x,
+		y,
+		&q
+	);
+	if (!ok) {
+		allocTextAtlas(ctx);
+		ok = fonsGetGlyphQuad(
+			ctx->m_FontStashContext,
+			font.idx,
+			prevCodepoint,
+			codepoint,
+			size,
+			spacing,
+			x,
+			y,
+			&q
+		);
+	}
+	if (ok) {
+		gq->x0 = q.x0;
+		gq->y0 = q.y0;
+		gq->x1 = q.x1;
+		gq->y1 = q.y1;
+		gq->s0 = q.s0;
+		gq->t0 = q.t0;
+		gq->s1 = q.s1;
+		gq->t1 = q.t1;
+	}
+	return ok;
+}
+
 bool getImageSize(Context* ctx, ImageHandle handle, uint16_t* w, uint16_t* h)
 {
 	if (!isValid(handle)) {
