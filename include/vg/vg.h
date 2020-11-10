@@ -352,6 +352,7 @@ struct TextConfig
 	uint32_t m_Alignment;
 	Color m_Color;
 	float m_Blur = 0.0f;
+	float m_Stroke = 0.0f;
 };
 
 struct Mesh

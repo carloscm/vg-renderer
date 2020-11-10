@@ -4258,6 +4258,52 @@ static void ctxText(Context* ctx, const TextConfig& cfg, float x, float y, const
 	ctxPushState(ctx);
 	ctxTransformTranslate(ctx, x + dx / scale, y + dy / scale);
 	renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+	if (cfg.m_Stroke > 0.0f) {
+		float const s = cfg.m_Stroke / scale;
+		x = x + dx / scale;
+		y = y + dy / scale;
+
+		ctxPopState(ctx);
+		ctxPushState(ctx);
+		ctxTransformTranslate(ctx, x + s, y);
+		renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+
+		ctxPopState(ctx);
+		ctxPushState(ctx);
+		ctxTransformTranslate(ctx, x + s, y + s);
+		renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+
+		ctxPopState(ctx);
+		ctxPushState(ctx);
+		ctxTransformTranslate(ctx, x, y + s);
+		renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+
+		ctxPopState(ctx);
+		ctxPushState(ctx);
+		ctxTransformTranslate(ctx, x - s, y + s);
+		renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+
+		ctxPopState(ctx);
+		ctxPushState(ctx);
+		ctxTransformTranslate(ctx, x - s, y);
+		renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+
+		ctxPopState(ctx);
+		ctxPushState(ctx);
+		ctxTransformTranslate(ctx, x - s, y - s);
+		renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+
+		ctxPopState(ctx);
+		ctxPushState(ctx);
+		ctxTransformTranslate(ctx, x, y - s);
+		renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+
+		ctxPopState(ctx);
+		ctxPushState(ctx);
+		ctxTransformTranslate(ctx, x + s, y - s);
+		renderTextQuads(ctx, numBakedChars, cfg.m_Color);
+
+	}
 	ctxPopState(ctx);
 }
 
@@ -4277,7 +4323,7 @@ static void ctxTextBox(Context* ctx, const TextConfig& cfg, float x, float y, fl
 	const int valign = alignment & (FONS_ALIGN_TOP | FONS_ALIGN_MIDDLE | FONS_ALIGN_BOTTOM | FONS_ALIGN_BASELINE);
 	const float lineh = getTextLineHeight(ctx, cfg);
 
-	const TextConfig newCfg = makeTextConfig(ctx, cfg.m_FontHandle, cfg.m_FontSize, FONS_ALIGN_LEFT | valign, cfg.m_Color);
+	const TextConfig newCfg = makeTextConfig(ctx, cfg.m_FontHandle, cfg.m_FontSize, FONS_ALIGN_LEFT | valign, cfg.m_Color, cfg.m_Blur, cfg.m_Stroke);
 
 	TextRow rows[5];
 	int nrows;

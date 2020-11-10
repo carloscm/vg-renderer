@@ -82,50 +82,50 @@ inline uint8_t colorGetBlue(Color c)
 }
 
 // Text helpers
-inline TextConfig makeTextConfig(Context* ctx, const char* fontName, float fontSize, uint32_t alignment, Color color)
+inline TextConfig makeTextConfig(Context* ctx, const char* fontName, float fontSize, uint32_t alignment, Color color, float blur, float stroke)
 {
-	return { getFontByName(ctx, fontName), fontSize, alignment, color };
+	return { getFontByName(ctx, fontName), fontSize, alignment, color, blur, stroke };
 }
 
-inline TextConfig makeTextConfig(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment, Color color)
+inline TextConfig makeTextConfig(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment, Color color, float blur, float stroke)
 {
 	BX_UNUSED(ctx);
-	return { fontHandle, fontSize, alignment, color };
+	return { fontHandle, fontSize, alignment, color, blur, stroke };
 }
 
 inline void text(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment, Color color, float x, float y, const char* str, const char* end)
 {
-	text(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, color), x, y, str, end);
+	text(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, color, 0.0f, 0.0f), x, y, str, end);
 }
 
 inline void textBox(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment, Color color, float x, float y, float breakWidth, const char* str, const char* end, uint32_t textboxFlags)
 {
-	textBox(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, color), x, y, breakWidth, str, end, textboxFlags);
+	textBox(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, color, 0.0f, 0.0f), x, y, breakWidth, str, end, textboxFlags);
 }
 
 inline float measureText(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment, float x, float y, const char* str, const char* end, float* bounds)
 {
-	return measureText(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent), x, y, str, end, bounds);
+	return measureText(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent, 0.0f, 0.0f), x, y, str, end, bounds);
 }
 
 inline void measureTextBox(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment, float x, float y, float breakWidth, const char* str, const char* end, float* bounds, uint32_t flags)
 {
-	measureTextBox(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent), x, y, breakWidth, str, end, bounds, flags);
+	measureTextBox(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent, 0.0f, 0.0f), x, y, breakWidth, str, end, bounds, flags);
 }
 
 inline float getTextLineHeight(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment)
 {
-	return getTextLineHeight(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent));
+	return getTextLineHeight(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent, 0.0f, 0.0f));
 }
 
 inline int textBreakLines(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment, const char* str, const char* end, float breakRowWidth, TextRow* rows, int maxRows, uint32_t flags)
 {
-	return textBreakLines(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent), str, end, breakRowWidth, rows, maxRows, flags);
+	return textBreakLines(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent, 0.0f, 0.0f), str, end, breakRowWidth, rows, maxRows, flags);
 }
 
 inline int textGlyphPositions(Context* ctx, FontHandle fontHandle, float fontSize, uint32_t alignment, float x, float y, const char* str, const char* end, GlyphPosition* positions, int maxPositions)
 {
-	return textGlyphPositions(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent), x, y, str, end, positions, maxPositions);
+	return textGlyphPositions(ctx, makeTextConfig(ctx, fontHandle, fontSize, alignment, Colors::Transparent, 0.0f, 0.0f), x, y, str, end, positions, maxPositions);
 }
 
 // Command list helpers
