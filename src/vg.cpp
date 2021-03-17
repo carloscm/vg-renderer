@@ -874,6 +874,10 @@ bgfx::TextureHandle getFontAtlasTexture(Context* ctx) {
 	return img->m_bgfxHandle;
 }
 
+void flushFontAtlasTexture(Context* ctx) {
+	flushTextAtlas(ctx);
+}
+
 void destroyContext(Context* ctx)
 {
 	bx::AllocatorI* allocator = ctx->m_Allocator;

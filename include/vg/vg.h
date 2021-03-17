@@ -405,6 +405,7 @@ struct Context;
 Context* createContext(bx::AllocatorI* allocator, const ContextConfig* cfg = nullptr);
 void destroyContext(Context* ctx);
 bgfx::TextureHandle getFontAtlasTexture(Context* ctx);
+void flushFontAtlasTexture(Context* ctx);
 
 void begin(Context* ctx, uint16_t viewID, uint16_t canvasWidth, uint16_t canvasHeight, float devicePixelRatio);
 void end(Context* ctx);
