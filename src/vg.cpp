@@ -3634,7 +3634,7 @@ static void ctxStrokePathImagePattern(Context* ctx, ImagePatternHandle imgPatter
 	const float scaledStrokeWidth = ((flags & StrokeFlags::FixedWidth) != 0) ? width : bx::clamp<float>(width * avgScale, 0.0f, 200.0f);
 	const bool isThin = scaledStrokeWidth <= fringeWidth;
 
-	const float alphaScale = isThin ? globalAlpha : globalAlpha * bx::square(bx::clamp<float>(scaledStrokeWidth, 0.0f, fringeWidth));
+	const float alphaScale = !isThin ? globalAlpha : globalAlpha * bx::square(bx::clamp<float>(scaledStrokeWidth, 0.0f, fringeWidth));
 	const Color col = colorSetAlpha(color, (uint8_t)(alphaScale * colorGetAlpha(color)));
 	if (!hasCache && colorGetAlpha(col) == 0) {
 		return;
