@@ -1116,12 +1116,15 @@ void end(Context* ctx)
 		const uint32_t maxVBVertices = ctx->m_Config.m_MaxVBVertices;
 		if (!bgfx::isValid(gpuvb->m_PosBufferHandle)) {
 			gpuvb->m_PosBufferHandle = bgfx::createDynamicVertexBuffer(maxVBVertices, ctx->m_PosVertexDecl, 0);
+			ctx->m_Stats.m_GPUDynVBs++;
 		}
 		if (!bgfx::isValid(gpuvb->m_UVBufferHandle)) {
 			gpuvb->m_UVBufferHandle = bgfx::createDynamicVertexBuffer(maxVBVertices, ctx->m_UVVertexDecl, 0);
+			ctx->m_Stats.m_GPUDynVBs++;
 		}
 		if (!bgfx::isValid(gpuvb->m_ColorBufferHandle)) {
 			gpuvb->m_ColorBufferHandle = bgfx::createDynamicVertexBuffer(maxVBVertices, ctx->m_ColorVertexDecl, 0);
+			ctx->m_Stats.m_GPUDynVBs++;
 		}
 
 		const bgfx::Memory* posMem = bgfx::makeRef(vb->m_Pos, sizeof(float) * 2 * vb->m_Count, releaseVertexBufferDataCallback_Vec2, ctx);
@@ -1147,6 +1150,7 @@ void end(Context* ctx)
 	const bgfx::Memory* indexMem = bgfx::makeRef(&ib->m_Indices[0], sizeof(uint16_t) * ib->m_Count, releaseIndexBufferCallback, ctx);
 	if (!bgfx::isValid(gpuib->m_bgfxHandle)) {
 		gpuib->m_bgfxHandle = bgfx::createDynamicIndexBuffer(indexMem, BGFX_BUFFER_ALLOW_RESIZE);
+		ctx->m_Stats.m_GPUDynIBs++;
 	} else {
 		bgfx::update(gpuib->m_bgfxHandle, 0, indexMem);
 	}

@@ -343,6 +343,8 @@ struct Stats
 {
 	uint32_t m_CmdListMemoryTotal;
 	uint32_t m_CmdListMemoryUsed;
+	uint32_t m_GPUDynVBs;
+	uint32_t m_GPUDynIBs;
 };
 
 struct TextConfig
