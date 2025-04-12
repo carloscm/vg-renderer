@@ -18,7 +18,7 @@ inline Color color4ub(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 	return VG_COLOR32(r, g, b, a);
 }
 
-inline Color colorHSB(float hue, float sat, float brightness)
+inline Color colorHSB(float hue, float sat, float brightness, float alpha)
 {
 	const float d = 1.0f / 6.0f;
 
@@ -52,8 +52,44 @@ inline Color colorHSB(float hue, float sat, float brightness)
 	uint32_t r = (uint32_t)bx::floor((fred + m) * 255.0f);
 	uint32_t g = (uint32_t)bx::floor((fgreen + m) * 255.0f);
 	uint32_t b = (uint32_t)bx::floor((fblue + m) * 255.0f);
+	uint32_t a = (uint32_t)bx::floor(alpha * 255.0f);
 
-	return 0xFF000000 | (b << 16) | (g << 8) | (r);
+	return (a << 24) | (b << 16) | (g << 8) | (r);
+}
+
+inline float _hue_helper(float h, float m1, float m2)
+{
+	if (h < 0) h += 1;
+	if (h > 1) h -= 1;
+	if (h < 1.0f/6.0f)
+		return m1 + (m2 - m1) * h * 6.0f;
+	else if (h < 3.0f/6.0f)
+		return m2;
+	else if (h < 4.0f/6.0f)
+		return m1 + (m2 - m1) * (2.0f/3.0f - h) * 6.0f;
+	return m1;
+}
+
+inline Color colorHSL(float hue, float sat, float lightness, float alpha)
+{
+	float m1, m2;
+	hue = bx::mod(hue, 1.0f);
+	if (hue < 0.0f) hue += 1.0f;
+	sat = bx::clamp<float>(sat, 0.0f, 1.0f);
+	lightness = bx::clamp<float>(lightness, 0.0f, 1.0f);
+	m2 = lightness <= 0.5f ? (lightness * (1 + sat)) : (lightness + sat - lightness * sat);
+	m1 = 2 * lightness - m2;
+	float fr = bx::clamp<float>(_hue_helper(hue + 1.0f/3.0f, m1, m2), 0.0f, 1.0f);
+	float fg = bx::clamp<float>(_hue_helper(hue, m1, m2), 0.0f, 1.0f);
+	float fb = bx::clamp<float>(_hue_helper(hue - 1.0f/3.0f, m1, m2), 0.0f, 1.0f);
+	float fa = alpha;
+
+	uint32_t r = (uint32_t)bx::floor(fr * 255.0f);
+	uint32_t g = (uint32_t)bx::floor(fg * 255.0f);
+	uint32_t b = (uint32_t)bx::floor(fb * 255.0f);
+	uint32_t a = (uint32_t)bx::floor(fa * 255.0f);
+
+	return (a << 24) | (b << 16) | (g << 8) | (r);
 }
 
 inline Color colorSetAlpha(Color c, uint8_t a)
@@ -327,6 +363,11 @@ inline void clTransformMult(CommandListRef& ref, const float* mtx, TransformOrde
 inline void clSetViewBox(CommandListRef& ref, float x, float y, float w, float h)
 {
 	clSetViewBox(ref.m_Context, ref.m_Handle, x, y, w, h);
+}
+
+inline void clSetGlobalAlpha(CommandListRef& ref, float alpha)
+{
+	clSetGlobalAlpha(ref.m_Context, ref.m_Handle, alpha);
 }
 
 inline void clText(CommandListRef& ref, const TextConfig& cfg, float x, float y, const char* str, const char* end)

@@ -12,8 +12,18 @@
 #	define VG_CONFIG_ENABLE_SHAPE_CACHING 1
 #endif
 
+// For x86, this uses only SSE4.1.
 #ifndef VG_CONFIG_ENABLE_SIMD
 #	define VG_CONFIG_ENABLE_SIMD 1
+#endif
+
+// For x86 only. Only processors since roughly 2014 support this.
+#ifndef VG_CONFIG_ENABLE_FMA
+#if defined(__FMA__) || defined(__AVX2__)
+#	define VG_CONFIG_ENABLE_FMA 1
+#else
+#	define VG_CONFIG_ENABLE_FMA 0
+#endif
 #endif
 
 #ifndef VG_CONFIG_FORCE_AA_OFF
@@ -36,10 +46,10 @@
 #endif
 
 // NOTE: beginCommandList()/endCommandList() blocks require an indirect jump for each function/path command,
-// because they change the Context' vtable. If this is set to 0, all functions call their implementation 
+// because they change the Context' vtable. If this is set to 0, all functions call their implementation
 // directly (i.e. there will probably still be a jump there but it'll be unconditional/direct).
 // If you care about perf so much that an indirect unconditional jump is a problem for you, or if you aren't
-// planning on using command lists at all, set this to 0 and use only clXXX functions to build command lists. 
+// planning on using command lists at all, set this to 0 and use only clXXX functions to build command lists.
 #ifndef VG_CONFIG_COMMAND_LIST_BEGIN_END_API
 #	define VG_CONFIG_COMMAND_LIST_BEGIN_END_API 1
 #endif
@@ -103,7 +113,8 @@ typedef uint32_t Color;
 
 Color color4f(float r, float g, float b, float a);
 Color color4ub(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-Color colorHSB(float h, float s, float b);
+Color colorHSB(float h, float s, float b, float a=1.0f);
+Color colorHSL(float h, float s, float l, float a=1.0f);
 Color colorSetAlpha(Color c, uint8_t a);
 uint8_t colorGetRed(Color c);
 uint8_t colorGetGreen(Color c);
@@ -261,6 +272,7 @@ struct TextBoxFlags
 {
 	enum Enum : uint32_t
 	{
+		None       = 0,
 		KeepSpaces = 1 << 0
 	};
 };
@@ -279,11 +291,14 @@ struct ImageFlags
 		Filter_NearestW  = 1 << 1,
 		Filter_LinearUV  = 1 << 2,
 		Filter_LinearW   = 1 << 3,
+		Clamp_U          =  1 << 10,
+		Clamp_V          =  1 << 11,
 
 		// Shortcuts
 		Filter_Nearest = Filter_NearestUV | Filter_NearestW,
 		Filter_Bilinear = Filter_LinearUV | Filter_NearestW,
-		Filter_Trilinear = Filter_LinearUV | Filter_LinearW
+		Filter_Trilinear = Filter_LinearUV | Filter_LinearW,
+		Clamp_UV = Clamp_U | Clamp_V
 	};
 };
 
@@ -337,6 +352,7 @@ struct ContextConfig
 	uint32_t m_MaxVBVertices;       // default: 65536
 	uint32_t m_FontAtlasImageFlags; // default: ImageFlags::Filter_Bilinear
 	uint32_t m_MaxCommandListDepth; // default: 16
+	bool m_ResetViewTransformOnEnd; // default: true
 };
 
 struct Stats
@@ -388,6 +404,7 @@ struct CommandListFlags
 {
 	enum Enum : uint32_t
 	{
+		None                = 0,
 		Cacheable           = 1 << 0, // Cache the generated geometry in order to avoid retesselation every frame; uses extra memory
 		AllowCommandCulling = 1 << 1, // If the scissor rect ends up being zero-sized, don't execute fill/stroke commands.
 	};
@@ -397,6 +414,7 @@ struct FontFlags
 {
 	enum Enum : uint32_t
 	{
+		None         = 0,
 		DontCopyData = 1 << 0, // The calling code will keep the font data alive for as long as the Context is alive so there's no need to copy the data internally.
 	};
 };
@@ -552,6 +570,7 @@ void clTransformTranslate(Context* ctx, CommandListHandle handle, float x, float
 void clTransformRotate(Context* ctx, CommandListHandle handle, float ang_rad);
 void clTransformMult(Context* ctx, CommandListHandle handle, const float* mtx, TransformOrder::Enum order);
 void clSetViewBox(Context* ctx, CommandListHandle handle, float x, float y, float w, float h);
+void clSetGlobalAlpha(Context* ctx, CommandListHandle handle, float alpha);
 
 void clText(Context* ctx, CommandListHandle handle, const TextConfig& cfg, float x, float y, const char* str, const char* end);
 void clTextBox(Context* ctx, CommandListHandle handle, const TextConfig& cfg, float x, float y, float breakWidth, const char* str, const char* end, uint32_t textboxFlags);
@@ -617,6 +636,9 @@ void clTransformScale(CommandListRef& ref, float x, float y);
 void clTransformTranslate(CommandListRef& ref, float x, float y);
 void clTransformRotate(CommandListRef& ref, float ang_rad);
 void clTransformMult(CommandListRef& ref, const float* mtx, TransformOrder::Enum order);
+void clSetViewBox(CommandListRef &ref, float x, float y, float w, float h);
+void clSetGlobalAlpha(CommandListRef &ref, float alpha);
+
 void clText(CommandListRef& ref, const TextConfig& cfg, float x, float y, const char* str, const char* end);
 void clTextBox(CommandListRef& ref, const TextConfig& cfg, float x, float y, float breakWidth, const char* str, const char* end, uint32_t textboxFlags);
 void clSubmitCommandList(CommandListRef& ref, CommandListHandle child);
